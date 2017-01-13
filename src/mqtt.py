@@ -25,7 +25,7 @@ class Mqtt:
 		#load sids dictionary
 		self._sids = config.get("sids", None)
 		if (self._sids == None):
-			raise "Config sids section is null"
+			self._sids = dict({})
 
 		#load mqtt settings
 		mqttConfig = config.get("mqtt", None)
@@ -94,39 +94,41 @@ class Mqtt:
 		if (len(parts) != 5):
 			return
 		model = parts[1]
-		name = parts[2] #name part
-		found = False
-		for sid in self._sids:
-			if (sid == None):
+		query_sid = parts[2] #sid or name part
+		param = parts[3] #param part
+		value = (msg.payload).decode('utf-8')
+		if self._is_int(value):
+			value = int(value)
+		name = "" # we will find it next
+		sid = query_sid
+
+		for current_sid in self._sids:
+			if (current_sid == None):
 				continue
-			sidprops = self._sids.get(sid, None)
+			sidprops = self._sids.get(current_sid, None)
 			if sidprops == None:
 				continue
-			sidname = sidprops.get("name", sid)
+			sidname = sidprops.get("name", current_sid)
 			sidmodel = sidprops.get("model", "")
-			if sidname != name or sidmodel != model:
-				_LOGGER.debug(sidmodel + "-" + sidname + " is not " + model + "-" + name + ".")
+			if (sidname == query_sid and sidmodel == model):
+				sid = current_sid
+				name = sidname
+				break
+			else:
+				_LOGGER.debug(sidmodel + "-" + sidname + " is not " + model + "-" + query_sid + ".")
 				continue
-			param = parts[3] #param part
-			value = (msg.payload).decode('utf-8')
-			if self._is_int(value):
-				value = int(value)
 
-			# fix for rgb format
-			if (param == "rgb" and "," in str(value)):
-				arr = value.split(",")
-				r = int(arr[0])
-				g = int(arr[1])
-				b = int(arr[2])
-				value = int('%02x%02x%02x%02x' % (255, r, g, b), 16)
+		# fix for rgb format
+		if (param == "rgb" and "," in str(value)):
+			arr = value.split(",")
+			r = int(arr[0])
+			g = int(arr[1])
+			b = int(arr[2])
+			value = int('%02x%02x%02x%02x' % (255, r, g, b), 16)
 
-			data = {'sid': sid, 'model': model, 'name': name, 'param':param, 'value':value}
-			# put in process queuee
-			self._queue.put(data)
-			found = True
-			break
-		if (found == False):
-			_LOGGER.error("Device " + model + "/" + name + " not found =(.")
+		data = {'sid': sid, 'model': model, 'name': name, 'param':param, 'value':value}
+		# put in process queuee
+		self._queue.put(data)
 
 	def _mqtt_loop(self):
 		_LOGGER.info("Starting mqtt loop.")
