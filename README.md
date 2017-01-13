@@ -5,10 +5,14 @@ I use it for home assistant integration and it works well now (exclude Brightnes
 You need to activate developer mode (described here: http://bbs.xiaomi.cn/t-13198850)
 
 Bridge accept following MQTT set:
-- "home/plug/heater/status/set" -> on will turn on plug/heater
+```
+"home/plug/heater/status/set" -> on 
+```
 
-and translate devices state from gateway:
-- "home/plug/heater/status" on
+will turn on plug/heater and translate devices state from gateway:
+```
+"home/plug/heater/status" on
+```
 
 Sample config file (config.yaml):
 ```
