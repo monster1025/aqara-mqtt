@@ -1,5 +1,6 @@
 xiaomi:
   build: .
+  dockerfile: Dockerfile-i386
   container_name: xiaomi
   net: host
   restart: always
