@@ -15,49 +15,18 @@ will turn on plug/heater and translate devices state from gateway:
 ```
 
 ## Config
+Edit file config/config-sample.yaml and rename it to config/config.yaml
 
-Sample config file (config.yaml):
+## Docker-Compose
+Sample docker-compose.yaml file for user:
 ```
-mqtt:
-  server: 192.168.1.2
-  port: 1883
-  username: username
-  password: passw0rd
-  prefix: home
-
-gateway:
-  password: passw0rd
-
-sids:
-  # motion
-  158d0000e7c7ad:
-    model: motion
-    name: hall
-
-  # temperature
-  158d0001149b3c: 
-    model: sensor_ht
-    name: living
-
-  # plugs
-  158d00010dd98d: 
-    model: plug
-    name: heater
-
-  # buttons
-  158d00012d5720: 
-    model: switch
-    name: kitchen
-
-  # cube
-  158d00011065e3: 
-    model: cube
-    name: main
-
-  # gateway
-  f0b429aa1463: 
-    model: gateway
-    name: main
+aqara:
+  image: monster1025/aqara-mqtt
+  container_name: aqara
+  volumes:
+    - "./config:/app/config"
+  net: host
+  restart: always
 ```
 
 ## Related projects
