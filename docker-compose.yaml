@@ -2,5 +2,7 @@ xiaomi:
   build: .
   dockerfile: Dockerfile-i386
   container_name: xiaomi
+  volumes:
+    - "./config:/app/config"
   net: host
   restart: always

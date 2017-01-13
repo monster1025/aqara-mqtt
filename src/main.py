@@ -46,7 +46,7 @@ def process_mqtt_messages(gateway, client):
 
 if __name__ == "__main__":
 	_LOGGER.info("Loading config file...")
-	config=yamlparser.load_yaml('config.yaml')
+	config=yamlparser.load_yaml('config/config.yaml')
 	gateway_pass = yamlparser.get_gateway_password(config)
 
 	_LOGGER.info("Init mqtt client.")
