@@ -1,4 +1,4 @@
-# aqara-mqtt
+# Aqara-MQTT
 Aqara (Xiaomi) Gateway to MQTT brodge. 
 I use it for home assistant integration and it works well now (exclude Brightness+RGB value of gateway - you need to send it in xiaomi format).
 
@@ -13,6 +13,8 @@ will turn on plug/heater and translate devices state from gateway:
 ```
 "home/plug/heater/status" on
 ```
+
+## Config
 
 Sample config file (config.yaml):
 ```
@@ -58,6 +60,6 @@ sids:
     name: main
 ```
 
-# Related projects
+## Related projects
 - https://github.com/lazcad/homeassistant
 - https://github.com/fooxy/homeassistant-aqara/
