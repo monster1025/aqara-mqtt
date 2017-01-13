@@ -1,8 +1,4 @@
-#for x86
-FROM monster1025/alpine86-python
-
-#for x64
-#FROM jfloff/alpine-python:3.4
+FROM jfloff/alpine-python:3.4
 
 ENV LIBRARY_PATH=/lib:/usr/lib
 
