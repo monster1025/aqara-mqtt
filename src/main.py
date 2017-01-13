@@ -9,7 +9,7 @@ import mqtt
 import yamlparser
 from xiaomihub import XiaomiHub
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 _LOGGER = logging.getLogger(__name__)
 
 def process_gateway_messages(gateway, client):
