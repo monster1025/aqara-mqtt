@@ -1,0 +1,5 @@
+xiaomi:
+  build: .
+  container_name: xiaomi
+  net: host
+  restart: always
