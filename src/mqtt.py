@@ -12,7 +12,7 @@ class Mqtt:
 	server = "localhost"
 	port = 1883
 	prefix = "home"
-	
+
 	_client = None
 	_sids = None
 	_queue = None
@@ -48,8 +48,8 @@ class Mqtt:
 		self._client.on_message = self._mqtt_process_message
 		self._client.on_connect = self._mqtt_on_connect
 		self._client.connect(self.server, self.port, 60)
-        
-        #run message processing loop
+
+		#run message processing loop
 		t1 = Thread(target=self._mqtt_loop)
 		t1.start()
 		self._threads.append(t1)
@@ -72,14 +72,10 @@ class Mqtt:
 			if (model == "motion" and key == "no_motion"):
 				key="status"
 				value="no_motion"
-			
+
 			# fix for rgb format
-			# if (key == "rgb" and self._is_int(value)):
-			# 	intval = int(value)
-			# 	blue =  (intval) & 255
-			# 	green = (intval >> 8) & 255
-			# 	red =  (intval >> 16) & 255
-			# 	value = str(red)+","+str(green)+","+str(blue)
+			if (key == "rgb" and self._is_int(value)):
+				value = self._color_xiaomi_to_rgb(value)
 
 			topic = PATH_FMT.format(model=model, sid=sid, prop=key)
 			_LOGGER.info("Publishing message to topic " + topic + ": " + str(value) + ".")
@@ -120,15 +116,7 @@ class Mqtt:
 
 		# fix for rgb format
 		if (param == "rgb" and "," in str(value)):
-			arr = value.split(",")
-			r = int(arr[0])
-			g = int(arr[1])
-			b = int(arr[2])
-			if len(arr)>3:
-				bright = int(arr[3])
-			else:
-				bright = 255
-			value = int('%02x%02x%02x%02x' % (bright, r, g, b), 16)
+			value = self._color_rgb_to_xiaomi(value)
 
 		data = {'sid': sid, 'model': model, 'name': name, 'param':param, 'value':value}
 		# put in process queuee
@@ -137,6 +125,27 @@ class Mqtt:
 	def _mqtt_loop(self):
 		_LOGGER.info("Starting mqtt loop.")
 		self._client.loop_forever()
+
+	def _color_xiaomi_to_rgb(self, xiaomi_color):
+		intval = int(xiaomi_color)
+		blue =  (intval) & 255
+		green = (intval >> 8) & 255
+		red =  (intval >> 16) & 255
+		bright = (intval >> 24) & 255
+		value = str(red)+","+str(green)+","+str(blue)+","+str(bright)
+		return value
+
+	def _color_rgb_to_xiaomi(self, rgb_string):
+		arr = rgb_string.split(",")
+		r = int(arr[0])
+		g = int(arr[1])
+		b = int(arr[2])
+		if len(arr)>3:
+			bright = int(arr[3])
+		else:
+			bright = 255
+		value = int('%02x%02x%02x%02x' % (bright, r, g, b), 16)
+		return value
 
 	def _is_int(self, x):
 		try:
