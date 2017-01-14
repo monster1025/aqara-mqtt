@@ -32,3 +32,6 @@ aqara:
 ## Related projects
 - https://github.com/lazcad/homeassistant
 - https://github.com/fooxy/homeassistant-aqara/
+
+General discussions:
+- https://community.home-assistant.io/t/beta-xiaomi-gateway-integration/8213/288
