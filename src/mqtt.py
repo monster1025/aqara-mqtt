@@ -72,6 +72,9 @@ class Mqtt:
 			if (model == "motion" and key == "no_motion"):
 				key="status"
 				value="no_motion"
+			# do not retain event-based sensors (like switches).
+			if (model == "switch"):
+				retain = False
 
 			# fix for rgb format
 			if (key == "rgb" and self._is_int(value)):
