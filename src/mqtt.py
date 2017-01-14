@@ -124,7 +124,11 @@ class Mqtt:
 			r = int(arr[0])
 			g = int(arr[1])
 			b = int(arr[2])
-			value = int('%02x%02x%02x%02x' % (255, r, g, b), 16)
+			if len(arr)>3:
+				bright = int(arr[3])
+			else:
+				bright = 255
+			value = int('%02x%02x%02x%02x' % (bright, r, g, b), 16)
 
 		data = {'sid': sid, 'model': model, 'name': name, 'param':param, 'value':value}
 		# put in process queuee
