@@ -231,6 +231,7 @@ class XiaomiDevice():
         self._sid = device['sid']
         self._name = '{}_{}'.format(name, self._sid)
         self.parse_data(device['data'])
+        self._last_event_id = -1
 
         self.xiaomi_hub = xiaomi_hub
         xiaomi_hub.XIAOMI_HA_DEVICES[self._sid].append(self)
@@ -248,4 +249,6 @@ class XiaomiDevice():
         return True
 
     def parse_data(self, data):
+        print(data)
+        # self._last_event_id = data
         return True

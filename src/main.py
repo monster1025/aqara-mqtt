@@ -29,6 +29,28 @@ def process_gateway_messages(gateway, client):
 		except Exception as e:
 			_LOGGER.error('Error while sending from gateway to mqtt: ', str(e))
 
+def read_motion_data(gateway, client, polling_interval):
+	first = True
+	while True:
+		try:
+			for device in gateway.XIAOMI_DEVICES['binary_sensor']:
+				model = device.get("model", "")
+				if (model!="motion"):
+					continue
+				sid = device['sid']
+
+				sensor_resp = gateway.get_from_hub(sid)
+				data = json.loads(sensor_resp['data'])
+				state = data.get("status", None)
+				short_id = sensor_resp['short_id']
+				if (device['data'] != data or first):
+					device['data'] = data
+					client.publish(model, sid, data)
+			first = False
+		except Exception as e:
+			_LOGGER.error('Error while sending from mqtt to gateway: ', str(e))
+		time.sleep(polling_interval)
+
 def process_mqtt_messages(gateway, client):
 	while True:
 		try: 
@@ -48,6 +70,7 @@ if __name__ == "__main__":
 	_LOGGER.info("Loading config file...")
 	config=yamlparser.load_yaml('config/config.yaml')
 	gateway_pass = yamlparser.get_gateway_password(config)
+	polling_interval = config['gateway'].get("polling_interval", 2)
 
 	_LOGGER.info("Init mqtt client.")
 	client = mqtt.Mqtt(config)
@@ -64,6 +87,10 @@ if __name__ == "__main__":
 	t2 = threading.Thread(target=process_mqtt_messages, args=[gateway, client])
 	t2.daemon = True
 	t2.start()
+
+	t3 = threading.Thread(target=read_motion_data, args=[gateway, client, polling_interval])
+	t3.daemon = True
+	t3.start()
 
 	while True:
 		time.sleep(10)
