@@ -8,6 +8,8 @@ mqtt:
 gateway:
   password: passw0rd
   polling_interval: 2
+  polling_models:
+    - motion
 
 sids:
   # motion

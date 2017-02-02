@@ -29,23 +29,26 @@ def process_gateway_messages(gateway, client):
 		except Exception as e:
 			_LOGGER.error('Error while sending from gateway to mqtt: ', str(e))
 
-def read_motion_data(gateway, client, polling_interval):
+def read_motion_data(gateway, client, polling_interval, polling_models):
 	first = True
 	while True:
 		try:
-			for device in gateway.XIAOMI_DEVICES['binary_sensor']:
-				model = device.get("model", "")
-				if (model!="motion"):
-					continue
-				sid = device['sid']
+			for device_type in gateway.XIAOMI_DEVICES:
+				devices = gateway.XIAOMI_DEVICES[device_type]
+				for device in devices:
+					model = device.get("model", "")
+					if (model not in polling_models):
+						continue
+					sid = device['sid']
+					_LOGGER.debug("Polling " + str(model) + " with sid: " + str(sid))
 
-				sensor_resp = gateway.get_from_hub(sid)
-				data = json.loads(sensor_resp['data'])
-				state = data.get("status", None)
-				short_id = sensor_resp['short_id']
-				if (device['data'] != data or first):
-					device['data'] = data
-					client.publish(model, sid, data)
+					sensor_resp = gateway.get_from_hub(sid)
+					data = json.loads(sensor_resp['data'])
+					state = data.get("status", None)
+					short_id = sensor_resp['short_id']
+					if (device['data'] != data or first):
+						device['data'] = data
+						client.publish(model, sid, data)
 			first = False
 		except Exception as e:
 			_LOGGER.error('Error while sending from mqtt to gateway: ', str(e))
@@ -71,6 +74,7 @@ if __name__ == "__main__":
 	config=yamlparser.load_yaml('config/config.yaml')
 	gateway_pass = yamlparser.get_gateway_password(config)
 	polling_interval = config['gateway'].get("polling_interval", 2)
+	polling_models = config['gateway'].get("polling_models", ['motion'])
 
 	_LOGGER.info("Init mqtt client.")
 	client = mqtt.Mqtt(config)
@@ -88,7 +92,7 @@ if __name__ == "__main__":
 	t2.daemon = True
 	t2.start()
 
-	t3 = threading.Thread(target=read_motion_data, args=[gateway, client, polling_interval])
+	t3 = threading.Thread(target=read_motion_data, args=[gateway, client, polling_interval, polling_models])
 	t3.daemon = True
 	t3.start()
 
