@@ -1,6 +1,6 @@
 # Aqara-MQTT
 Aqara (Xiaomi) Gateway to MQTT brodge. 
-I use it for home assistant integration and it works well now (exclude Brightness+RGB value of gateway - you need to send it in xiaomi format).
+I use it for home assistant integration and it works well now.
 
 You need to activate developer mode (described here: http://bbs.xiaomi.cn/t-13198850)
 
