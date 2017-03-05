@@ -2,6 +2,8 @@ import socket
 import struct
 import json
 import logging
+import sys
+import select
 from collections import defaultdict
 from queue import Queue
 from threading import Thread
@@ -111,9 +113,23 @@ class XiaomiHub:
     def _send_cmd(self, cmd, rtnCmd):
         return self._send_socket(cmd, rtnCmd, self.GATEWAY_IP, self.GATEWAY_PORT)
 
+    def _read_unwanted_data(self):
+        try:
+            socket = self._socket
+            socket_list = [sys.stdin, socket]
+            read_sockets, write_sockets, error_sockets = select.select(socket_list , [], [])
+            for sock in read_sockets:
+                if sock == socket:
+                    data = sock.recv(4096)
+                    print("Not recieved data: " + str(data))
+        except Exception as e:
+            _LOGGER.error("Cannot read unwanted data: " + str(e))
+
     def _send_socket(self, cmd, rtnCmd, ip, port):
         socket = self._socket
         try:
+            self._read_unwanted_data()
+
             socket.settimeout(30.0)
             socket.sendto(cmd.encode(), (ip, port))
             socket.settimeout(30.0)
