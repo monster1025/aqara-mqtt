@@ -72,6 +72,10 @@ class Mqtt:
 			if (model == "motion" and key == "no_motion"):
 				key="status"
 				value="no_motion"
+			if (model == "magnet" and key == "no_close"):
+				key="status"
+				value="open"
+
 			# do not retain event-based sensors (like switches and cubes).
 			if (model in ["switch", "cube"]):
 				retain = False

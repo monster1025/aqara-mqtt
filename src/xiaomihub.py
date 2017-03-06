@@ -121,7 +121,7 @@ class XiaomiHub:
             for sock in read_sockets:
                 if sock == socket:
                     data = sock.recv(4096)
-                    print("Not recieved data: " + str(data))
+                    _LOGGER.error("Unwanted data recieved: " + str(data))
         except Exception as e:
             _LOGGER.error("Cannot read unwanted data: " + str(e))
 

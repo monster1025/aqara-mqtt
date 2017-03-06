@@ -9,7 +9,7 @@ import mqtt
 import yamlparser
 from xiaomihub import XiaomiHub
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 _LOGGER = logging.getLogger(__name__)
 
 def process_gateway_messages(gateway, client):
@@ -42,8 +42,10 @@ def read_motion_data(gateway, client, polling_interval, polling_models):
 					sid = device['sid']
 
 					sensor_resp = gateway.get_from_hub(sid)
+					if (sensor_resp == None):
+						continue;
 					if (sensor_resp['sid'] != sid):
-						print("Error: Response sid(" + sensor_resp['sid'] + ") differs from requested(" + sid + "). Skipping.")
+						_LOGGER.error("Error: Response sid(" + sensor_resp['sid'] + ") differs from requested(" + sid + "). Skipping.")
 						continue;
 
 					data = json.loads(sensor_resp['data'])
