@@ -86,7 +86,7 @@ if __name__ == "__main__":
 	client = mqtt.Mqtt(config)
 	client.connect()
 	#only this devices can be controlled from MQTT
-	client.subscribe("gateway", "+", "rgb", "set")
+	client.subscribe("gateway", "+", "+", "set")
 	client.subscribe("plug", "+", "status", "set")
 
 	gateway = XiaomiHub(gateway_pass)

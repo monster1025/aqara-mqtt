@@ -128,6 +128,7 @@ class XiaomiHub:
     def _send_socket(self, cmd, rtnCmd, ip, port):
         socket = self._socket
         try:
+            _LOGGER.info('Sending to GW {0}'.format(cmd))
             self._read_unwanted_data()
 
             socket.settimeout(30.0)
