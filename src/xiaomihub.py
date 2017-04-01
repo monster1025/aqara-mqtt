@@ -128,7 +128,7 @@ class XiaomiHub:
     def _send_socket(self, cmd, rtnCmd, ip, port):
         socket = self._socket
         try:
-            _LOGGER.info('Sending to GW {0}'.format(cmd))
+            _LOGGER.debug('Sending to GW {0}'.format(cmd))
             self._read_unwanted_data()
 
             socket.settimeout(30.0)
@@ -137,6 +137,7 @@ class XiaomiHub:
             data, addr = socket.recvfrom(1024)
             if len(data) is not None:
                 resp = json.loads(data.decode())
+                _LOGGER.debug('Recieved from GW {0}'.format(resp))
                 if resp["cmd"] == rtnCmd:
                     return resp
                 else:

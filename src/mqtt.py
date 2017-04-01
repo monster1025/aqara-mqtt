@@ -105,6 +105,7 @@ class Mqtt:
 		name = "" # we will find it next
 		sid = query_sid
 
+		isFound = False
 		for current_sid in self._sids:
 			if (current_sid == None):
 				continue
@@ -116,10 +117,14 @@ class Mqtt:
 			if (sidname == query_sid and sidmodel == model):
 				sid = current_sid
 				name = sidname
+				isFound = True
 				break
 			else:
 				_LOGGER.debug(sidmodel + "-" + sidname + " is not " + model + "-" + query_sid + ".")
 				continue
+
+		if isFound == False:
+			return
 
 		# fix for rgb format
 		if (param == "rgb" and "," in str(value)):
