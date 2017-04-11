@@ -55,7 +55,7 @@ class XiaomiHub:
             _LOGGER.error("Cannot discover hub using whois: {0}".format(e))
 
         self._socket.close()
-	
+    
         if self.GATEWAY_IP is None:
             _LOGGER.error('No Gateway found. Cannot continue')
             return None
