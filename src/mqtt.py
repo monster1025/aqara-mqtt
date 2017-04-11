@@ -3,6 +3,7 @@ import os
 import logging
 from queue import Queue
 from threading import Thread
+import json
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -54,8 +55,10 @@ class Mqtt:
 		t1.start()
 		self._threads.append(t1)
 
-	def subscribe(self, model="+", name="+", prop="+", command="set"):
-		topic = self.prefix + "/" + model + "/" + name + "/" + prop + "/" + command
+	def subscribe(self, model="+", name="+", prop="+", command=None):
+		topic = self.prefix + "/" + model + "/" + name + "/" + prop
+		if command is not None:
+			topic +=  "/" + command
 		_LOGGER.info("Subscibing to " + topic + ".")
 		self._client.subscribe(topic)
 
@@ -94,17 +97,21 @@ class Mqtt:
 	def _mqtt_process_message(self, client, userdata, msg):
 		_LOGGER.info("Processing message in " + str(msg.topic) + ": " + str(msg.payload) + ".")
 		parts = msg.topic.split("/")
-		if (len(parts) != 5):
+		if len(parts) < 4:
+			# should we return an error message ?
 			return
+
 		model = parts[1]
 		query_sid = parts[2] #sid or name part
 		param = parts[3] #param part
-		value = (msg.payload).decode('utf-8')
-		if self._is_int(value):
-			value = int(value)
+		method = None
+		if len(parts) > 4:
+			method = parts[4]
+		else:
+			method = parts[3]
+
 		name = "" # we will find it next
 		sid = query_sid
-
 		isFound = False
 		for current_sid in self._sids:
 			if (current_sid == None):
@@ -124,15 +131,33 @@ class Mqtt:
 				continue
 
 		if isFound == False:
+			# should we return an error message ?
 			return
 
-		# fix for rgb format
-		if (param == "rgb" and "," in str(value)):
-			value = self._color_rgb_to_xiaomi(value)
+		if method == "set":
+			# use single value set method
 
-		data = {'sid': sid, 'model': model, 'name': name, 'param':param, 'value':value}
-		# put in process queuee
-		self._queue.put(data)
+			value = (msg.payload).decode('utf-8')
+			if self._is_int(value):
+				value = int(value)
+
+			# fix for rgb format
+			if (param == "rgb" and "," in str(value)):
+				value = self._color_rgb_to_xiaomi(value)
+
+			# prepare values dict
+			data = {'sid': sid, 'model': model, 'name': name,
+					'values': {param: value}}
+			# put in process queuee
+			self._queue.put(data)
+		
+		elif method == "write":
+			# use raw write method to the sensor, we expect a jsonified dict here.
+			values = json.loads((msg.payload).decode('utf-8'))
+			data = {'sid': sid, 'model': model, 'name': name,
+					'values': values}
+			# put in process queuee
+			self._queue.put(data)
 
 	def _mqtt_loop(self):
 		_LOGGER.info("Starting mqtt loop.")

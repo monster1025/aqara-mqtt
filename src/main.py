@@ -67,10 +67,9 @@ def process_mqtt_messages(gateway, client):
 			_LOGGER.debug("data from mqtt: " + format(data))
 
 			sid = data.get("sid", None)
-			param = data.get("param", None)
-			value = data.get("value", None)
+			values = data.get("values", dict())
 
-			resp = gateway.write_to_hub(sid, param, value)
+			resp = gateway.write_to_hub(sid, **values)
 			client._queue.task_done()
 		except Exception as e:
 			_LOGGER.error('Error while sending from mqtt to gateway: ', str(e))
@@ -87,6 +86,7 @@ if __name__ == "__main__":
 	client.connect()
 	#only this devices can be controlled from MQTT
 	client.subscribe("gateway", "+", "+", "set")
+	client.subscribe("gateway", "+", "write", None)
 	client.subscribe("plug", "+", "status", "set")
 
 	gateway = XiaomiHub(gateway_pass)
