@@ -55,7 +55,7 @@ class XiaomiHub:
             _LOGGER.error("Cannot discover hub using whois: {0}".format(e))
 
         self._socket.close()
-	
+    
         if self.GATEWAY_IP is None:
             _LOGGER.error('No Gateway found. Cannot continue')
             return None
@@ -149,14 +149,14 @@ class XiaomiHub:
             _LOGGER.error("Cannot connect to Gateway")
             socket.close()
 
-    def write_to_hub(self, sid, data_key, datavalue):
+    def write_to_hub(self, sid, **values):
         key = self._get_key()
-        if type(datavalue) == int:
-            datavalue_formatted = str(datavalue)
-        else:
-            datavalue_formatted = '"' + datavalue + '"'
-        cmd = '{ "cmd":"write","sid":"' + sid + '","data":"{"' + data_key + '":' + datavalue_formatted + ',"key":"' + key + '"}}'
-        return self._send_cmd(cmd, "write_ack")     
+        cmd = {
+            "cmd": "write",
+            "sid": sid,
+            "data": dict(key=key, **values)
+        }
+        return self._send_cmd(json.dumps(cmd), "write_ack")     
 
     def get_from_hub(self, sid):
         cmd = '{ "cmd":"read","sid":"' + sid + '"}'
