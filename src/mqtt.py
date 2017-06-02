@@ -63,7 +63,7 @@ class Mqtt:
         topic = self.prefix + "/" + model + "/" + name + "/" + prop
         if command is not None:
             topic +=  "/" + command
-        _LOGGER.info("Subscibing to " + topic + ".")
+        _LOGGER.info("Subscribing to " + topic + ".")
         self._client.subscribe(topic)
 
     def publish(self, model, sid, data, retain=True):
