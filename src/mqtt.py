@@ -57,6 +57,7 @@ class Mqtt:
 
     def disconnect(self):
         self._client.disconnect()
+        self._queue.put(None)
 
     def subscribe(self, model="+", name="+", prop="+", command=None):
         topic = self.prefix + "/" + model + "/" + name + "/" + prop

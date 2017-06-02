@@ -17,6 +17,8 @@ def process_gateway_messages(gateway, client, stop_event):
     while not stop_event.is_set():
         try: 
             packet = gateway._queue.get()
+            if packet is None:
+                continue
             _LOGGER.debug("data from queuee: " + format(packet))
 
             sid = packet.get("sid", None)
@@ -67,6 +69,8 @@ def process_mqtt_messages(gateway, client, stop_event):
     while not stop_event.is_set():
         try: 
             data = client._queue.get()
+            if data is None:
+                continue
             _LOGGER.debug("data from mqtt: " + format(data))
 
             sid = data.get("sid", None)
@@ -81,8 +85,11 @@ def process_mqtt_messages(gateway, client, stop_event):
 def exit_handler(signal, frame):
     print('Exiting')
     stop_event.set()
-    gateway.stop()
+    t3.join()
     client.disconnect()
+    t2.join()
+    gateway.stop()
+    t1.join()
 
 if __name__ == "__main__":
     _LOGGER.info("Loading config file...")
