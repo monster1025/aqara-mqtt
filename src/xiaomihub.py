@@ -79,7 +79,7 @@ class XiaomiHub:
 
         _LOGGER.info('Found {0} devices'.format(len(sids)))
 
-        sensors = ['sensor_ht']
+        sensors = ['sensor_ht', 'sensor_wleak.aq1']
         binary_sensors = ['magnet', 'motion', 'switch', '86sw1', '86sw2', 'cube']
         switches = ['plug', 'ctrl_neutral1', 'ctrl_neutral2']
 
@@ -104,6 +104,8 @@ class XiaomiHub:
                 device_type = 'binary_sensor'
             elif model in switches:
                 device_type = 'switch'
+            else:
+                device_type = 'sensor' #not really matters
 
             if device_type == None:
                 _LOGGER.error('Unsupported devices : {0}'.format(model))
