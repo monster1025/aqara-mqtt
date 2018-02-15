@@ -23,6 +23,8 @@ jobs:
         # push image
         - >
           if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+            docker images
+            echo $IMAGE_NAME
             docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
             docker tag $IMAGE_NAME $IMAGE_NAME:$VERSION-$ARCH
             docker push $IMAGE_NAME:$VERSION-$ARCH
