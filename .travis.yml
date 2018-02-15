@@ -9,23 +9,21 @@ env:
 jobs:
   include:
     - stage: build rpi image
+      before_script:
+        - VERSION=$(cat .semver)
+        - ARCH=rpi
+
       script:
         # prepare qemu
         - docker run --rm --privileged multiarch/qemu-user-static:register --reset
 
         # build
-        - docker build -t $IMAGE_NAME -f Dockerfile-rpi  .
-        - docker images
+        - docker build -t $IMAGE_NAME -f Dockerfile-$ARCH .
 
         # push image
         - >
           if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
-            VERSION=$(cat .semver)
-            ARCH=rpi
-
             docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD"
-            docker images
             docker tag $IMAGE_NAME $IMAGE_NAME:$VERSION-$ARCH
-            docker images
-            # docker push $IMAGE_NAME:$VERSION-$ARCH
+            docker push $IMAGE_NAME:$VERSION-$ARCH
           fi
