@@ -9,4 +9,8 @@ jobs:
     - stage: build rpi image
       script:
         - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
-        - docker build --file Dockerfile-rpi -t $DOCKER_USERNAME/aqara-mqtt:$TRAVIS_TAG-rpi .
+        - docker build --file Dockerfile-rpi -t aqara-mqtt-rpi .
+        - docker images
+        - echo $TRAVIS_TAG
+        - docker tag aqara-mqtt-rpi $DOCKER_USERNAME/aqara-mqtt:$TRAVIS_TAG-rpi
+        - docker images
