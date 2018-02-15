@@ -10,9 +10,19 @@ jobs:
       script:
         # prepare qemu
         - docker run --rm --privileged multiarch/qemu-user-static:register --reset
+
         # build
-        - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
-        - docker build --file Dockerfile-rpi -t aqara-mqtt-rpi .
+        - docker build --file Dockerfile-rpi -t $DOCKER_USERNAME/aqara-mqtt .
         - docker images
-        - docker tag aqara-mqtt-rpi $DOCKER_USERNAME/aqara-mqtt:`cat .semver`-rpi
-        - docker images
+
+        # push image
+        - >
+          if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+            VERSION=$(cat .semver)
+            ARCH=rpi
+            docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD"
+            docker images
+            docker tag $DOCKER_USERNAME/aqara-mqtt $DOCKER_USERNAME/aqara-mqttl:$VERSION-$ARCH
+            docker images
+            # docker push $DOCKER_USERNAME/aqara-mqtt:$VERSION-$ARCH
+          fi
