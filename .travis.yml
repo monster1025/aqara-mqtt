@@ -1,0 +1,12 @@
+sudo: true
+dist: trusty
+
+services:
+  - docker
+
+jobs:
+  include:
+    - stage: build rpi image
+      script:
+        - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+        - docker build --file Dockerfile-rpi -t $DOCKER_USERNAME/aqara-mqtt:$(`cat .semver`)-rpi .
