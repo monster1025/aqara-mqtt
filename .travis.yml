@@ -8,6 +8,9 @@ jobs:
   include:
     - stage: build rpi image
       script:
+        # prepare qemu
+        - docker run --rm --privileged multiarch/qemu-user-static:register --reset
+        # build
         - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
         - docker build --file Dockerfile-rpi -t aqara-mqtt-rpi .
         - docker images
