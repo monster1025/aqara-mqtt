@@ -1,22 +1,20 @@
 sudo: true
-dist: trusty
-
 services:
   - docker
 
-before_script:
-  - sudo apt-get --yes --no-install-recommends install binfmt-support qemu-user-static
-  - echo ':arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-arm-static:' | sudo tee -a /proc/sys/fs/binfmt_misc/register
+env:
+  global:
+    - IMAGE_NAME=$DOCKER_USERNAME/aqara-mqtt
 
 jobs:
   include:
     - stage: build rpi image
       script:
-        # # prepare qemu
-        # - docker run --rm --privileged multiarch/qemu-user-static:register --reset
+        # prepare qemu
+        - docker run --rm --privileged multiarch/qemu-user-static:register --reset
 
         # build
-        - docker build --file Dockerfile-rpi -t $DOCKER_USERNAME/aqara-mqtt .
+        - docker build -t $IMAGE_NAME -f Dockerfile-rpi  .
         - docker images
 
         # push image
@@ -24,9 +22,10 @@ jobs:
           if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
             VERSION=$(cat .semver)
             ARCH=rpi
+
             docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD"
             docker images
-            docker tag $DOCKER_USERNAME/aqara-mqtt $DOCKER_USERNAME/aqara-mqttl:$VERSION-$ARCH
+            docker tag $IMAGE_NAME $IMAGE_NAME:$VERSION-$ARCH
             docker images
-            # docker push $DOCKER_USERNAME/aqara-mqtt:$VERSION-$ARCH
+            # docker push $IMAGE_NAME:$VERSION-$ARCH
           fi
