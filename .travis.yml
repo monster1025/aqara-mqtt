@@ -8,10 +8,10 @@ env:
 
 jobs:
   include:
-    - stage: build rpi image
+    - stage: build armhf image
       before_script:
         - VERSION=$(cat .semver)
-        - ARCH=rpi
+        - ARCH=armhf
 
       script:
         # prepare qemu
@@ -23,7 +23,7 @@ jobs:
         # push image
         - >
           if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
-            docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD"
+            docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
             docker tag $IMAGE_NAME $IMAGE_NAME:$VERSION-$ARCH
             docker push $IMAGE_NAME:$VERSION-$ARCH
           fi
