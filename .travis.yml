@@ -12,11 +12,6 @@ env:
     - MINOR=$(cut -d. -f2 .semver)
     - PATCH=$(cut -d. -f3 .semver)
 
-cache:
-  bundler: true
-  directories:
-    - /var/lib/docker/
-
 jobs:
   include:
     - stage: build x64 image
