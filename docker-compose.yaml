@@ -1,6 +1,6 @@
 aqara:
   build: .
-  dockerfile: Dockerfile-rpi
+  dockerfile: Dockerfile-armhf
   container_name: aqara
   volumes:
     - "./config:/app/config"
