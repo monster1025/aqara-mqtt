@@ -14,6 +14,12 @@ will turn on plug/heater and translate devices state from gateway:
 "home/plug/heater/status" on
 ```
 
+## Architecture
+Docker image support following architectures (you must choose your architecture in docker-compose):
+- armhf (raspberry pi 3, arm32v7)
+- i386 (x86 pc)
+- x64 (x64 pc)
+
 ## Config
 Edit file config/config-sample.yaml and rename it to config/config.yaml
 
@@ -21,7 +27,7 @@ Edit file config/config-sample.yaml and rename it to config/config.yaml
 Sample docker-compose.yaml file for user:
 ```
 aqara:
-  image: monster1025/aqara-mqtt
+  image: monster1025/aqara-mqtt:1-armhf
   container_name: aqara
   volumes:
     - "./config:/app/config"
