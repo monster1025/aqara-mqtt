@@ -9,6 +9,31 @@ env:
 
 jobs:
   include:
+    - stage: build x64 image
+      before_script:
+        - VERSION=$(cat .semver)
+        - ARCH=x64
+
+      script:
+        # build
+        - docker build -t $PROJECT -f Dockerfile-$ARCH .
+
+        # push image
+        - >
+          if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+            docker images
+            echo $IMAGE_NAME
+            docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+
+            #version-arch
+            docker tag $PROJECT $IMAGE_NAME:$VERSION-$ARCH
+            docker push $IMAGE_NAME:$VERSION-$ARCH
+
+            #latest by arch
+            docker tag $PROJECT $IMAGE_NAME:$ARCH
+            docker push $IMAGE_NAME:$ARCH
+          fi
+
     - stage: build i386 image
       before_script:
         - VERSION=$(cat .semver)
