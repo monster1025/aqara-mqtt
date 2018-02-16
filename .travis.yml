@@ -9,24 +9,12 @@ env:
 
 jobs:
   include:
-    - stage: build armhf image
+    - stage: build i386 image
       before_script:
         - VERSION=$(cat .semver)
-        - ARCH=armhf
+        - ARCH=i386
 
       script:
-        # prepare qemu
-        - docker run --rm --privileged multiarch/qemu-user-static:register --reset
-        # get qemu-arm-static binary
-        - mkdir tmp
-        - >
-          pushd tmp &&
-          curl -L -o qemu-arm-static.tar.gz https://github.com/multiarch/qemu-user-static/releases/download/v2.6.0/qemu-arm-static.tar.gz &&
-          tar xzf qemu-arm-static.tar.gz &&
-          popd
-        #copy it to container
-        - sed -i -e '2iCOPY tmp/qemu-arm-static /usr/bin/qemu-arm-static\' Dockerfile-$ARCH
-
         # build
         - docker build -t $PROJECT -f Dockerfile-$ARCH .
 
@@ -46,12 +34,24 @@ jobs:
             docker push $IMAGE_NAME:$ARCH
           fi
 
-    - stage: build i386 image
+    - stage: build armhf image
       before_script:
         - VERSION=$(cat .semver)
-        - ARCH=i386
+        - ARCH=armhf
 
       script:
+        # prepare qemu
+        - docker run --rm --privileged multiarch/qemu-user-static:register --reset
+        # get qemu-arm-static binary
+        - >
+          mkdir tmp &&
+          pushd tmp &&
+          curl -L -o qemu-arm-static.tar.gz https://github.com/multiarch/qemu-user-static/releases/download/v2.6.0/qemu-arm-static.tar.gz &&
+          tar xzf qemu-arm-static.tar.gz &&
+          popd
+        #copy it to container
+        - sed -i -e '2iCOPY tmp/qemu-arm-static /usr/bin/qemu-arm-static\' Dockerfile-$ARCH
+
         # build
         - docker build -t $PROJECT -f Dockerfile-$ARCH .
 
