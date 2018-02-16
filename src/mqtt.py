@@ -8,6 +8,7 @@ import json
 _LOGGER = logging.getLogger(__name__)
 
 class Mqtt:
+    event_based_sensors = ["switch", "cube"]
     username = ""
     password = ""
     server = "localhost"
@@ -38,6 +39,7 @@ class Mqtt:
         self.server = mqttConfig.get("server", "localhost")
         self.port = mqttConfig.get("port", 1883)
         self.prefix = mqttConfig.get("prefix", "home")
+        self.json = mqttConfig.get("json", False)
         self._queue = Queue()
         self._threads = []
 
@@ -72,8 +74,6 @@ class Mqtt:
             model = sidprops.get("model",model)
             sid = sidprops.get("name",sid)
 
-        # _LOGGER.info("data is " + format(data))
-        PATH_FMT = self.prefix + "/{model}/{sid}/{prop}"
         for key, value in data.items():
             # fix for latest motion value
             if (model == "motion" and key == "no_motion"):
@@ -82,18 +82,29 @@ class Mqtt:
             if (model == "magnet" and key == "no_close"):
                 key="status"
                 value="open"
-
             # do not retain event-based sensors (like switches and cubes).
-            if (model in ["switch", "cube"]):
+            if (model in self.event_based_sensors):
                 retain = False
-
             # fix for rgb format
             if (key == "rgb" and self._is_int(value)):
                 value = self._color_xiaomi_to_rgb(value)
 
-            topic = PATH_FMT.format(model=model, sid=sid, prop=key)
-            _LOGGER.info("Publishing message to topic " + topic + ": " + str(value) + ".")
-            self._client.publish(topic, payload=value, qos=0, retain=retain)
+        if self.json == True:
+            PATH_FMT = self.prefix + "/{model}/{sid}/json"
+            topic = PATH_FMT.format(model=model, sid=sid)
+            values = {}
+            values['sid'] = sid
+            for key, value in data.items():
+                values[key] = value
+            jsondata = json.dumps(values)
+            _LOGGER.info("Publishing message to topic " + topic + ": " + str(jsondata) + ".")
+            self._client.publish(topic, payload=jsondata, qos=0, retain=retain)
+        else:
+            for key, value in data.items():
+                PATH_FMT = self.prefix + "/{model}/{sid}/{prop}"
+                topic = PATH_FMT.format(model=model, sid=sid, prop=key)
+                _LOGGER.info("Publishing message to topic " + topic + ": " + str(value) + ".")
+                self._client.publish(topic, payload=value, qos=0, retain=retain)
 
     def _mqtt_on_connect(self, client, userdata, rc, unk):
         _LOGGER.info("Connected to mqtt server.")

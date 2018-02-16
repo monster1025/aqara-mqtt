@@ -4,6 +4,8 @@ mqtt:
   username: username
   password: passw0rd
   prefix: home
+  #send report as json
+  json: False
 
 gateway:
   password: passw0rd
