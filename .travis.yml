@@ -1,4 +1,5 @@
 sudo: true
+language: python
 services:
   - docker
 
@@ -6,14 +7,15 @@ env:
   global:
     - PROJECT=aqara-mqtt
     - IMAGE_NAME=$DOCKER_USERNAME/$PROJECT
+    - VERSION=$(cat .semver)
+    - MAJOR=$(cut -d. -f1 .semver)
+    - MINOR=$(cut -d. -f2 .semver)
+    - PATCH=$(cut -d. -f3 .semver)
 
 jobs:
   include:
     - stage: build x64 image
       before_script:
-        - VERSION=$(cat .semver)
-        - MAJOR=$(cut -d. -f1 .semver)
-        - MINOR=$(cut -d. -f2 .semver)
         - ARCH=x64
 
       script:
@@ -46,9 +48,6 @@ jobs:
 
     - stage: build i386 image
       before_script:
-        - VERSION=$(cat .semver)
-        - MAJOR=$(cut -d. -f1 .semver)
-        - MINOR=$(cut -d. -f2 .semver)
         - ARCH=i386
 
       script:
@@ -81,9 +80,6 @@ jobs:
 
     - stage: build armhf image
       before_script:
-        - VERSION=$(cat .semver)
-        - MAJOR=$(cut -d. -f1 .semver)
-        - MINOR=$(cut -d. -f2 .semver)
         - ARCH=armhf
 
       script:
@@ -105,8 +101,6 @@ jobs:
         # push image
         - >
           if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
-            docker images
-            echo $IMAGE_NAME
             docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
 
             #1.0.0-arch
