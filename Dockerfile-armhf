@@ -3,6 +3,7 @@ FROM arm32v7/python:slim
 ENV LIBRARY_PATH=/lib:/usr/lib
 
 ADD src/requirements.txt /
+RUN mkdir /tmp2 && cd /tmp2 && curl -L -o qemu-arm-static.tar.gz https://github.com/multiarch/qemu-user-static/releases/download/v2.6.0/qemu-arm-static.tar.gz && tar xzf qemu-arm-static.tar.gz && cp /tmp2/qemu-arm-static /usr/bin/qemu-arm-static && rm -rf /tmp2
 RUN /usr/bin/apt-get update
 
 #RUN apt-get update && apt-get install -y build-essential autoconf \
