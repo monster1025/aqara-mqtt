@@ -12,6 +12,8 @@ jobs:
     - stage: build x64 image
       before_script:
         - VERSION=$(cat .semver)
+        - MAJOR=$(cut -d. -f1 .semver)
+        - MINOR=$(cut -d. -f2 .semver)
         - ARCH=x64
 
       script:
@@ -25,9 +27,17 @@ jobs:
             echo $IMAGE_NAME
             docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
 
-            #version-arch
+            #1.0.0-arch
             docker tag $PROJECT $IMAGE_NAME:$VERSION-$ARCH
             docker push $IMAGE_NAME:$VERSION-$ARCH
+
+            #1.0-arch
+            docker tag $PROJECT $IMAGE_NAME:$MAJOR.$MINOR-$ARCH
+            docker push $IMAGE_NAME:$MAJOR.$MINOR-$ARCH
+
+            #1-arch
+            docker tag $PROJECT $IMAGE_NAME:$MAJOR-$ARCH
+            docker push $IMAGE_NAME:$MAJOR-$ARCH
 
             #latest by arch
             docker tag $PROJECT $IMAGE_NAME:$ARCH
@@ -37,6 +47,8 @@ jobs:
     - stage: build i386 image
       before_script:
         - VERSION=$(cat .semver)
+        - MAJOR=$(cut -d. -f1 .semver)
+        - MINOR=$(cut -d. -f2 .semver)
         - ARCH=i386
 
       script:
@@ -50,9 +62,17 @@ jobs:
             echo $IMAGE_NAME
             docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
 
-            #version-arch
+            #1.0.0-arch
             docker tag $PROJECT $IMAGE_NAME:$VERSION-$ARCH
             docker push $IMAGE_NAME:$VERSION-$ARCH
+
+            #1.0-arch
+            docker tag $PROJECT $IMAGE_NAME:$MAJOR.$MINOR-$ARCH
+            docker push $IMAGE_NAME:$MAJOR.$MINOR-$ARCH
+
+            #1-arch
+            docker tag $PROJECT $IMAGE_NAME:$MAJOR-$ARCH
+            docker push $IMAGE_NAME:$MAJOR-$ARCH
 
             #latest by arch
             docker tag $PROJECT $IMAGE_NAME:$ARCH
@@ -62,6 +82,8 @@ jobs:
     - stage: build armhf image
       before_script:
         - VERSION=$(cat .semver)
+        - MAJOR=$(cut -d. -f1 .semver)
+        - MINOR=$(cut -d. -f2 .semver)
         - ARCH=armhf
 
       script:
@@ -87,9 +109,17 @@ jobs:
             echo $IMAGE_NAME
             docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
 
-            #version-arch
+            #1.0.0-arch
             docker tag $PROJECT $IMAGE_NAME:$VERSION-$ARCH
             docker push $IMAGE_NAME:$VERSION-$ARCH
+
+            #1.0-arch
+            docker tag $PROJECT $IMAGE_NAME:$MAJOR.$MINOR-$ARCH
+            docker push $IMAGE_NAME:$MAJOR.$MINOR-$ARCH
+
+            #1-arch
+            docker tag $PROJECT $IMAGE_NAME:$MAJOR-$ARCH
+            docker push $IMAGE_NAME:$MAJOR-$ARCH
 
             #latest by arch
             docker tag $PROJECT $IMAGE_NAME:$ARCH
