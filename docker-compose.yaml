@@ -1,5 +1,5 @@
 aqara:
-  build: .
+  image: monster1025/aqara-mqtt:armhf
   dockerfile: Dockerfile-armhf
   container_name: aqara
   volumes:

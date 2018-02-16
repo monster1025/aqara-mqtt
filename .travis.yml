@@ -36,6 +36,12 @@ jobs:
             docker images
             echo $IMAGE_NAME
             docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+
+            #version-arch
             docker tag $PROJECT $IMAGE_NAME:$VERSION-$ARCH
             docker push $IMAGE_NAME:$VERSION-$ARCH
+
+            #latest by arch
+            docker tag $PROJECT $IMAGE_NAME:$ARCH
+            docker push $IMAGE_NAME:$ARCH
           fi
