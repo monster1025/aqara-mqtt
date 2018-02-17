@@ -97,6 +97,7 @@ if __name__ == "__main__":
     gateway_pass = yamlparser.get_gateway_password(config)
     polling_interval = config['gateway'].get("polling_interval", 2)
     polling_models = config['gateway'].get("polling_models", ['motion'])
+    gateway_ip = config['gateway'].get("ip", None)
 
     signal.signal(signal.SIGINT, exit_handler)
     signal.signal(signal.SIGTERM, exit_handler)
@@ -109,7 +110,7 @@ if __name__ == "__main__":
     client.subscribe("gateway", "+", "write", None)
     client.subscribe("plug", "+", "status", "set")
 
-    gateway = XiaomiHub(gateway_pass)
+    gateway = XiaomiHub(gateway_pass, gateway_ip)
     stop_event= threading.Event()
     t1 = threading.Thread(target=process_gateway_messages, args=[gateway, client, stop_event])
     t1.daemon = True

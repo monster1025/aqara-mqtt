@@ -8,6 +8,7 @@ mqtt:
   json: False
 
 gateway:
+  ip: 192.168.0.47
   password: passw0rd
   polling_interval: 2
   polling_models:
