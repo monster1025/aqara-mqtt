@@ -1,0 +1,117 @@
+sudo: true
+language: python
+services:
+  - docker
+
+env:
+  global:
+    - PROJECT=aqara-mqtt
+    - IMAGE_NAME=$DOCKER_USERNAME/$PROJECT
+    - VERSION=$(cat .semver)
+    - MAJOR=$(cut -d. -f1 .semver)
+    - MINOR=$(cut -d. -f2 .semver)
+    - PATCH=$(cut -d. -f3 .semver)
+
+jobs:
+  include:
+    - stage: build x64 image
+      before_script:
+        - ARCH=x64
+
+      script:
+        # build
+        - docker build -t $PROJECT -f Dockerfile-$ARCH .
+
+        # push image
+        - >
+          if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+            docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+
+            #1.0.0-arch
+            docker tag $PROJECT $IMAGE_NAME:$VERSION-$ARCH
+            docker push $IMAGE_NAME:$VERSION-$ARCH
+
+            #1.0-arch
+            docker tag $PROJECT $IMAGE_NAME:$MAJOR.$MINOR-$ARCH
+            docker push $IMAGE_NAME:$MAJOR.$MINOR-$ARCH
+
+            #1-arch
+            docker tag $PROJECT $IMAGE_NAME:$MAJOR-$ARCH
+            docker push $IMAGE_NAME:$MAJOR-$ARCH
+
+            #latest by arch
+            docker tag $PROJECT $IMAGE_NAME:$ARCH
+            docker push $IMAGE_NAME:$ARCH
+          fi
+
+    - stage: build i386 image
+      before_script:
+        - ARCH=i386
+
+      script:
+        # build
+        - docker build -t $PROJECT -f Dockerfile-$ARCH .
+
+        # push image
+        - >
+          if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+            docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+
+            #1.0.0-arch
+            docker tag $PROJECT $IMAGE_NAME:$VERSION-$ARCH
+            docker push $IMAGE_NAME:$VERSION-$ARCH
+
+            #1.0-arch
+            docker tag $PROJECT $IMAGE_NAME:$MAJOR.$MINOR-$ARCH
+            docker push $IMAGE_NAME:$MAJOR.$MINOR-$ARCH
+
+            #1-arch
+            docker tag $PROJECT $IMAGE_NAME:$MAJOR-$ARCH
+            docker push $IMAGE_NAME:$MAJOR-$ARCH
+
+            #latest by arch
+            docker tag $PROJECT $IMAGE_NAME:$ARCH
+            docker push $IMAGE_NAME:$ARCH
+          fi
+
+    - stage: build armhf image
+      before_script:
+        - ARCH=armhf
+              
+      script:
+        # prepare qemu
+        - docker run --rm --privileged multiarch/qemu-user-static:register --reset
+        # get qemu-arm-static binary
+        - >
+          mkdir tmp &&
+          pushd tmp &&
+          curl -L -o qemu-arm-static.tar.gz https://github.com/multiarch/qemu-user-static/releases/download/v2.6.0/qemu-arm-static.tar.gz &&
+          tar xzf qemu-arm-static.tar.gz &&
+          popd
+        #copy it to container
+        - sed -i -e '2iCOPY tmp/qemu-arm-static /usr/bin/qemu-arm-static\' Dockerfile-$ARCH
+
+        # build
+        - docker build -t $PROJECT -f Dockerfile-$ARCH .
+
+        # push image
+        - >
+          if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+            docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+
+            #1.0.0-arch
+            docker tag $PROJECT $IMAGE_NAME:$VERSION-$ARCH
+            docker push $IMAGE_NAME:$VERSION-$ARCH
+
+            #1.0-arch
+            docker tag $PROJECT $IMAGE_NAME:$MAJOR.$MINOR-$ARCH
+            docker push $IMAGE_NAME:$MAJOR.$MINOR-$ARCH
+
+            #1-arch
+            docker tag $PROJECT $IMAGE_NAME:$MAJOR-$ARCH
+            docker push $IMAGE_NAME:$MAJOR-$ARCH
+
+            #latest by arch
+            docker tag $PROJECT $IMAGE_NAME:$ARCH
+            docker push $IMAGE_NAME:$ARCH
+          fi

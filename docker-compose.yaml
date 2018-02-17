@@ -1,6 +1,5 @@
 aqara:
-  build: .
-  dockerfile: Dockerfile-rpi
+  image: monster1025/aqara-mqtt:1-armhf
   container_name: aqara
   volumes:
     - "./config:/app/config"
