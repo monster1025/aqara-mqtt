@@ -74,6 +74,7 @@ class Mqtt:
             model = sidprops.get("model",model)
             sid = sidprops.get("name",sid)
 
+        items = {}
         for key, value in data.items():
             # fix for latest motion value
             if (model == "motion" and key == "no_motion"):
@@ -88,23 +89,24 @@ class Mqtt:
             # fix for rgb format
             if (key == "rgb" and self._is_int(value)):
                 value = self._color_xiaomi_to_rgb(value)
+            items[key] = value
 
         if self.json == True:
             PATH_FMT = self.prefix + "/{model}/{sid}/json"
             topic = PATH_FMT.format(model=model, sid=sid)
             values = {}
             values['sid'] = sid
-            for key, value in data.items():
-                values[key] = value
+            for key in items:
+                values[key] = items[key]
             jsondata = json.dumps(values)
             _LOGGER.info("Publishing message to topic " + topic + ": " + str(jsondata) + ".")
             self._client.publish(topic, payload=jsondata, qos=0, retain=retain)
         else:
-            for key, value in data.items():
+            for key in items:
                 PATH_FMT = self.prefix + "/{model}/{sid}/{prop}"
                 topic = PATH_FMT.format(model=model, sid=sid, prop=key)
-                _LOGGER.info("Publishing message to topic " + topic + ": " + str(value) + ".")
-                self._client.publish(topic, payload=value, qos=0, retain=retain)
+                _LOGGER.info("Publishing message to topic " + topic + ": " + str(items[key]) + ".")
+                self._client.publish(topic, payload=items[key], qos=0, retain=retain)
 
     def _mqtt_on_connect(self, client, userdata, rc, unk):
         _LOGGER.info("Connected to mqtt server.")
