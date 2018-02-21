@@ -9,6 +9,8 @@ _LOGGER = logging.getLogger(__name__)
 
 class Mqtt:
     event_based_sensors = ["switch", "cube"]
+    motion_sensors = ["motion", "sensor_motion.aq2"]
+    magnet_sensors = ["magnet"]
     username = ""
     password = ""
     server = "localhost"
@@ -77,10 +79,10 @@ class Mqtt:
         items = {}
         for key, value in data.items():
             # fix for latest motion value
-            if (model == "motion" and key == "no_motion"):
+            if (model in self.motion_sensors and key == "no_motion"):
                 key="status"
                 value="no_motion"
-            if (model == "magnet" and key == "no_close"):
+            if (model in self.magnet_sensors and key == "no_close"):
                 key="status"
                 value="open"
             # do not retain event-based sensors (like switches and cubes).
