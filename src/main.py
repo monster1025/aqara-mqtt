@@ -1,7 +1,6 @@
 import logging
 import time
 import threading
-import os
 import json
 import signal
 
@@ -15,7 +14,7 @@ _LOGGER = logging.getLogger(__name__)
 
 def process_gateway_messages(gateway, client, stop_event):
     while not stop_event.is_set():
-        try: 
+        try:
             packet = gateway._queue.get()
             if packet is None:
                 continue
@@ -41,16 +40,16 @@ def read_motion_data(gateway, client, polling_interval, polling_models, stop_eve
                 devices = gateway.XIAOMI_DEVICES[device_type]
                 for device in devices:
                     model = device.get("model", "")
-                    if (model not in polling_models):
+                    if model not in polling_models:
                         continue
                     sid = device['sid']
 
                     sensor_resp = gateway.get_from_hub(sid)
-                    if (sensor_resp == None):
-                        continue;
-                    if (sensor_resp['sid'] != sid):
+                    if sensor_resp is None:
+                        continue
+                    if sensor_resp['sid'] != sid:
                         _LOGGER.error("Error: Response sid(" + sensor_resp['sid'] + ") differs from requested(" + sid + "). Skipping.")
-                        continue;
+                        continue
 
                     data = json.loads(sensor_resp['data'])
                     state = data.get("status", None)
@@ -67,7 +66,7 @@ def read_motion_data(gateway, client, polling_interval, polling_models, stop_eve
 
 def process_mqtt_messages(gateway, client, stop_event):
     while not stop_event.is_set():
-        try: 
+        try:
             data = client._queue.get()
             if data is None:
                 continue
@@ -93,7 +92,7 @@ def exit_handler(signal, frame):
 
 if __name__ == "__main__":
     _LOGGER.info("Loading config file...")
-    config=yamlparser.load_yaml('config/config.yaml')
+    config = yamlparser.load_yaml('config/config.yaml')
     gateway_pass = yamlparser.get_gateway_password(config)
     polling_interval = config['gateway'].get("polling_interval", 2)
     polling_models = config['gateway'].get("polling_models", ['motion'])
@@ -111,7 +110,7 @@ if __name__ == "__main__":
     client.subscribe("plug", "+", "status", "set")
 
     gateway = XiaomiHub(gateway_pass, gateway_ip, config)
-    stop_event= threading.Event()
+    stop_event = threading.Event()
     t1 = threading.Thread(target=process_gateway_messages, args=[gateway, client, stop_event])
     t1.daemon = True
     t1.start()
