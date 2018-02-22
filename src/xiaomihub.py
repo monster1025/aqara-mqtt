@@ -237,7 +237,7 @@ class XiaomiHub:
             if isinstance(packet, dict):
                 try:
                     sid = packet['sid']
-                    model = packet['model']
+                    #model = packet['model']
                     data = json.loads(packet['data'])
                     
                     for device in self.XIAOMI_HA_DEVICES[sid]:

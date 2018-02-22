@@ -1,5 +1,4 @@
 import paho.mqtt.client as mqtt
-import os
 import logging
 from queue import Queue
 from threading import Thread
@@ -89,7 +88,7 @@ class Mqtt:
             if (model in self.event_based_sensors):
                 retain = False
             # fix for rgb format
-            if (key == "rgb" and self._is_int(value)):
+            if (key == "rgb" and value.isdigit()):
                 value = self._color_xiaomi_to_rgb(value)
             items[key] = value
 
@@ -157,7 +156,7 @@ class Mqtt:
             # use single value set method
 
             value = (msg.payload).decode('utf-8')
-            if self._is_int(value):
+            if value.isdigit():
                 value = int(value)
 
             # fix for rgb format
@@ -202,10 +201,3 @@ class Mqtt:
             bright = 255
         value = int('%02x%02x%02x%02x' % (bright, r, g, b), 16)
         return value
-
-    def _is_int(self, x):
-        try:
-            tmp = int(x)
-            return True
-        except Exception as e:
-            return False

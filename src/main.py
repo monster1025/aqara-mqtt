@@ -52,8 +52,6 @@ def read_motion_data(gateway, client, polling_interval, polling_models, stop_eve
                         continue
 
                     data = json.loads(sensor_resp['data'])
-                    state = data.get("status", None)
-                    short_id = sensor_resp['short_id']
                     if device['data'] != data or first:
                         device['data'] = data
                         _LOGGER.debug("Polling result differs for " + str(model) + " with sid(First: " + str(first) + "): " + str(sid) + "; " + str(data))
@@ -75,7 +73,7 @@ def process_mqtt_messages(gateway, client, stop_event):
             sid = data.get("sid", None)
             values = data.get("values", dict())
 
-            resp = gateway.write_to_hub(sid, **values)
+            gateway.write_to_hub(sid, **values)
             client._queue.task_done()
         except Exception as e:
             _LOGGER.error('Error while sending from mqtt to gateway: ', str(e))
