@@ -10,6 +10,7 @@ mqtt:
 gateway:
   ip: 192.168.0.47
   password: passw0rd
+  unwanted_data_fix: True #leave it True if it works for you. Otherwise (if you didn't recieve any data from sensors) - set it to False
   polling_interval: 2
   polling_models:
     - motion

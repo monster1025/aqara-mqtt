@@ -28,7 +28,7 @@ class XiaomiHub:
     GATEWAY_DISCOVERY_PORT = 4321
     SOCKET_BUFSIZE = 1024
 
-    def __init__(self, key, gateway=None):
+    def __init__(self, key, gateway_ip=None, config=None):
         self.GATEWAY_KEY = key
         self._listening = False
         self._queue = None
@@ -36,9 +36,14 @@ class XiaomiHub:
         self._mcastsocket = None
         self._deviceCallbacks = defaultdict(list)
         self._threads = []
+        self._read_unwanted_data_enabled = True
 
-        if gateway is not None:
-            self.GATEWAY_DISCOVERY_ADDRESS = gateway
+        if gateway_ip is not None:
+            self.GATEWAY_DISCOVERY_ADDRESS = gateway_ip
+
+        if config is not None and 'gateway' in config and 'unwanted_data_fix' in config['gateway']:
+            self._read_unwanted_data_enabled = (config['gateway']['unwanted_data_fix'] == True)
+            _LOGGER.info('"Read unwanted data" fix is {0}'.format(self._read_unwanted_data_enabled))
 
         try:
             _LOGGER.info('Discovering Xiaomi Gateways using address {0}'.format(self.GATEWAY_DISCOVERY_ADDRESS))
@@ -113,6 +118,9 @@ class XiaomiHub:
         return self._send_socket(cmd, rtnCmd, self.GATEWAY_IP, self.GATEWAY_PORT)
 
     def _read_unwanted_data(self):
+        if not self._read_unwanted_data_enabled:
+            return
+
         try:
             socket = self._socket
             socket_list = [sys.stdin, socket]
