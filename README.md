@@ -1,5 +1,6 @@
 # Aqara-MQTT
 [![Build Status](https://travis-ci.org/monster1025/aqara-mqtt.svg?branch=master)](https://travis-ci.org/monster1025/aqara-mqtt)
+
 Aqara (Xiaomi) Gateway to MQTT bridge. 
 I use it for home assistant integration and it works well now.
 

@@ -55,7 +55,7 @@ def read_motion_data(gateway, client, polling_interval, polling_models, stop_eve
                     data = json.loads(sensor_resp['data'])
                     state = data.get("status", None)
                     short_id = sensor_resp['short_id']
-                    if ( device['data'] != data or first):
+                    if device['data'] != data or first:
                         device['data'] = data
                         _LOGGER.debug("Polling result differs for " + str(model) + " with sid(First: " + str(first) + "): " + str(sid) + "; " + str(data))
                         client.publish(model, sid, data)
