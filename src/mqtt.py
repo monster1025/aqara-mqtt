@@ -88,8 +88,8 @@ class Mqtt:
             if (model in self.event_based_sensors):
                 retain = False
             # fix for rgb format
-            if (key == "rgb" and value.isdigit()):
-                value = self._color_xiaomi_to_rgb(value)
+            if (key == "rgb" and str(value).isdigit()):
+                value = self._color_xiaomi_to_rgb(str(value))
             items[key] = value
 
         if self.json == True:
