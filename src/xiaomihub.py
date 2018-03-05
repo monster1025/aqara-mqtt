@@ -110,10 +110,7 @@ class XiaomiHub:
             else:
                 device_type = 'sensor'  # not really matters
 
-            if device_type == None:
-                _LOGGER.error('Unsupported devices : {0}'.format(model))
-            else:
-                self.XIAOMI_DEVICES[device_type].append(xiaomi_device)
+            self.XIAOMI_DEVICES[device_type].append(xiaomi_device)
 
     def _send_cmd(self, cmd, rtnCmd):
         return self._send_socket(cmd, rtnCmd, self.GATEWAY_IP, self.GATEWAY_PORT)
