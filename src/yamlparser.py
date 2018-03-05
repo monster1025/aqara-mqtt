@@ -3,6 +3,7 @@ import logging
 
 _LOGGER = logging.getLogger(__name__)
 
+
 def load_yaml(file):
     try:
         stram = open(file, "r")
@@ -11,6 +12,7 @@ def load_yaml(file):
     except Exception as e:
         raise
         _LOGGER.error("Can't load yaml with sids %r (%r)" % (file, e))
+
 
 def get_gateway_password(config, ip=""):
     if (config == None):
