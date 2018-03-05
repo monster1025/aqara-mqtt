@@ -85,8 +85,10 @@ class XiaomiHub:
 
         _LOGGER.info('Found {0} devices'.format(len(sids)))
 
-        sensors = ['sensor_ht', 'sensor_wleak.aq1']
-        binary_sensors = ['magnet', 'motion', 'switch', '86sw1', '86sw2', 'cube']
+        sensors = ['sensor_ht', 'weather.v1', 'sensor_wleak.aq1']
+        binary_sensors = ['magnet', 'sensor_magnet.aq2', 'motion',
+                          'sensor_motion.aq2', 'switch', 'sensor_switch.aq2',
+                          '86sw1', '86sw2', 'cube']
         switches = ['plug', 'ctrl_neutral1', 'ctrl_neutral2']
 
         for sid in sids:
