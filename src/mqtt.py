@@ -6,6 +6,7 @@ import json
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class Mqtt:
     event_based_sensors = ["switch", "cube"]
     motion_sensors = ["motion", "sensor_motion.aq2"]
@@ -25,12 +26,12 @@ class Mqtt:
         if (config == None):
             raise "Config is null"
 
-        #load sids dictionary
+        # load sids dictionary
         self._sids = config.get("sids", None)
         if (self._sids == None):
             self._sids = dict({})
 
-        #load mqtt settings
+        # load mqtt settings
         mqttConfig = config.get("mqtt", None)
         if (mqttConfig == None):
             raise "Config mqtt section is null"
@@ -53,7 +54,7 @@ class Mqtt:
         self._client.on_connect = self._mqtt_on_connect
         self._client.connect(self.server, self.port, 60)
 
-        #run message processing loop
+        # run message processing loop
         t1 = Thread(target=self._mqtt_loop)
         t1.start()
         self._threads.append(t1)
@@ -65,25 +66,25 @@ class Mqtt:
     def subscribe(self, model="+", name="+", prop="+", command=None):
         topic = self.prefix + "/" + model + "/" + name + "/" + prop
         if command is not None:
-            topic +=  "/" + command
+            topic += "/" + command
         _LOGGER.info("Subscribing to " + topic + ".")
         self._client.subscribe(topic)
 
     def publish(self, model, sid, data, retain=True):
         sidprops = self._sids.get(sid, None)
         if (sidprops != None):
-            model = sidprops.get("model",model)
-            sid = sidprops.get("name",sid)
+            model = sidprops.get("model", model)
+            sid = sidprops.get("name", sid)
 
         items = {}
         for key, value in data.items():
             # fix for latest motion value
             if (model in self.motion_sensors and key == "no_motion"):
-                key="status"
-                value="no_motion"
+                key = "status"
+                value = "no_motion"
             if (model in self.magnet_sensors and key == "no_close"):
-                key="status"
-                value="open"
+                key = "status"
+                value = "open"
             # do not retain event-based sensors (like switches and cubes).
             if (model in self.event_based_sensors):
                 retain = False
@@ -120,15 +121,15 @@ class Mqtt:
             return
 
         model = parts[1]
-        query_sid = parts[2] #sid or name part
-        param = parts[3] #param part
+        query_sid = parts[2]  # sid or name part
+        param = parts[3]  # param part
         method = None
         if len(parts) > 4:
             method = parts[4]
         else:
             method = parts[3]
 
-        name = "" # we will find it next
+        name = ""  # we will find it next
         sid = query_sid
         isFound = False
         for current_sid in self._sids:
@@ -168,7 +169,7 @@ class Mqtt:
                     'values': {param: value}}
             # put in process queuee
             self._queue.put(data)
-        
+
         elif method == "write":
             # use raw write method to the sensor, we expect a jsonified dict here.
             values = json.loads((msg.payload).decode('utf-8'))
@@ -183,9 +184,9 @@ class Mqtt:
 
     def _color_xiaomi_to_rgb(self, xiaomi_color):
         intval = int(xiaomi_color)
-        blue =  (intval) & 255
+        blue = (intval) & 255
         green = (intval >> 8) & 255
-        red =  (intval >> 16) & 255
+        red = (intval >> 16) & 255
         bright = (intval >> 24) & 255
         value = str(red)+","+str(green)+","+str(blue)+","+str(bright)
         return value
@@ -195,7 +196,7 @@ class Mqtt:
         r = int(arr[0])
         g = int(arr[1])
         b = int(arr[2])
-        if len(arr)>3:
+        if len(arr) > 3:
             bright = int(arr[3])
         else:
             bright = 255

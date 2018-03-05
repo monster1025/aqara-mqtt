@@ -4,13 +4,14 @@ import threading
 import json
 import signal
 
-#mine
+# mine
 import mqtt
 import yamlparser
 from xiaomihub import XiaomiHub
 
 logging.basicConfig(level=logging.INFO)
 _LOGGER = logging.getLogger(__name__)
+
 
 def process_gateway_messages(gateway, client, stop_event):
     while not stop_event.is_set():
@@ -31,6 +32,7 @@ def process_gateway_messages(gateway, client, stop_event):
         except Exception as e:
             _LOGGER.error('Error while sending from gateway to mqtt: ', str(e))
     _LOGGER.info("Stopping Gateway Thread ...")
+
 
 def read_motion_data(gateway, client, polling_interval, polling_models, stop_event):
     first = True
@@ -62,6 +64,7 @@ def read_motion_data(gateway, client, polling_interval, polling_models, stop_eve
         time.sleep(polling_interval)
     _LOGGER.info("Stopping Polling Thread ...")
 
+
 def process_mqtt_messages(gateway, client, stop_event):
     while not stop_event.is_set():
         try:
@@ -78,6 +81,7 @@ def process_mqtt_messages(gateway, client, stop_event):
         except Exception as e:
             _LOGGER.error('Error while sending from mqtt to gateway: ', str(e))
     _LOGGER.info("Stopping MQTT Thread ...")
+
 
 def exit_handler(signal, frame):
     print('Exiting')
@@ -102,7 +106,7 @@ if __name__ == "__main__":
     _LOGGER.info("Init mqtt client.")
     client = mqtt.Mqtt(config)
     client.connect()
-    #only this devices can be controlled from MQTT
+    # only this devices can be controlled from MQTT
     client.subscribe("gateway", "+", "+", "set")
     client.subscribe("gateway", "+", "write", None)
     client.subscribe("plug", "+", "status", "set")

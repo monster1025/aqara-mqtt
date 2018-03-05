@@ -10,7 +10,8 @@ from threading import Thread
 
 _LOGGER = logging.getLogger(__name__)
 
-# MANDATORY!!!! NEED TO TURN OFF "_process_report" THREAD IF CODE IS UPDATED!!!!
+# MANDATORY!!!! NEED TO TURN OFF "_process_report" THREAD IF CODE IS UPDATED!!!
+
 
 class XiaomiHub:
     GATEWAY_KEY = None
@@ -60,11 +61,11 @@ class XiaomiHub:
             _LOGGER.error("Cannot discover hub using whois: {0}".format(e))
 
         self._socket.close()
-    
+
         if self.GATEWAY_IP is None:
             _LOGGER.error('No Gateway found. Cannot continue')
             return None
-        
+
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
         _LOGGER.info('Creating Multicast Socket')
@@ -94,10 +95,10 @@ class XiaomiHub:
             model = resp["model"]
 
             xiaomi_device = {
-                "model":model, 
-                "sid":resp["sid"], 
-                "short_id":resp["short_id"], 
-                "data":json.loads(resp["data"])}
+                "model": model,
+                "sid": resp["sid"],
+                "short_id": resp["short_id"],
+                "data": json.loads(resp["data"])}
 
             device_type = None
             if model in sensors:
@@ -107,7 +108,7 @@ class XiaomiHub:
             elif model in switches:
                 device_type = 'switch'
             else:
-                device_type = 'sensor' #not really matters
+                device_type = 'sensor'  # not really matters
 
             if device_type == None:
                 _LOGGER.error('Unsupported devices : {0}'.format(model))
@@ -124,7 +125,7 @@ class XiaomiHub:
         try:
             socket = self._socket
             socket_list = [sys.stdin, socket]
-            read_sockets, write_sockets, error_sockets = select.select(socket_list , [], [])
+            read_sockets, write_sockets, error_sockets = select.select(socket_list, [], [])
             for sock in read_sockets:
                 if sock == socket:
                     data = sock.recv(4096)
@@ -163,11 +164,11 @@ class XiaomiHub:
             "sid": sid,
             "data": dict(key=key, **values)
         }
-        return self._send_cmd(json.dumps(cmd), "write_ack")     
+        return self._send_cmd(json.dumps(cmd), "write_ack")
 
     def get_from_hub(self, sid):
         cmd = '{ "cmd":"read","sid":"' + sid + '"}'
-        return self._send_cmd(cmd, "read_ack")     
+        return self._send_cmd(cmd, "read_ack")
 
     def _get_key(self):
         from Crypto.Cipher import AES
@@ -237,9 +238,9 @@ class XiaomiHub:
             if isinstance(packet, dict):
                 try:
                     sid = packet['sid']
-                    #model = packet['model']
+                    # model = packet['model']
                     data = json.loads(packet['data'])
-                    
+
                     for device in self.XIAOMI_HA_DEVICES[sid]:
                         device.push_data(data)
 
@@ -247,6 +248,7 @@ class XiaomiHub:
                     _LOGGER.error("Cannot process Report: {0}".format(e))
 
             self._queue.task_done()
+
 
 class XiaomiDevice():
     """Representation a base Xiaomi device."""
