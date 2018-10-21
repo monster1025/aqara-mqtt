@@ -1,5 +1,7 @@
 import paho.mqtt.client as mqtt
 import logging
+import os
+import ssl
 from queue import Queue
 from threading import Thread
 import json
@@ -15,8 +17,10 @@ class Mqtt:
     password = ""
     server = "localhost"
     port = 1883
+    ca = None
+    tlsvers = None
     prefix = "home"
-
+    
     _client = None
     _sids = None
     _queue = None
@@ -41,6 +45,10 @@ class Mqtt:
         self.server = mqttConfig.get("server", "localhost")
         self.port = mqttConfig.get("port", 1883)
         self.prefix = mqttConfig.get("prefix", "home")
+        self.ca = mqttConfig.get("ca",None)
+        self.tlsvers = self._get_tls_version(
+                mqttConfig.get("tls_version","tlsv1.2")
+        )
         self.json = mqttConfig.get("json", False)
         self._queue = Queue()
         self._threads = []
@@ -52,8 +60,16 @@ class Mqtt:
             self._client.username_pw_set(self.username, self.password)
         self._client.on_message = self._mqtt_process_message
         self._client.on_connect = self._mqtt_on_connect
-        self._client.connect(self.server, self.port, 60)
+        if (self.ca != None):
+            self._client.tls_set(
+                    ca_certs=self.ca,
+                    cert_reqs=ssl.CERT_REQUIRED,
+                    tls_version=self.tlsvers
+            )
 
+            self._client.tls_insecure_set(False)
+
+        self._client.connect(self.server, self.port, 60)
         # run message processing loop
         t1 = Thread(target=self._mqtt_loop)
         t1.start()
@@ -202,3 +218,11 @@ class Mqtt:
             bright = 255
         value = int('%02x%02x%02x%02x' % (bright, r, g, b), 16)
         return value
+
+    def _get_tls_version(self,tlsString):
+        switcher = {
+            "tlsv1": ssl.PROTOCOL_TLSv1,
+            "tlsv1.1": ssl.PROTOCOL_TLSv1_1,
+            "tlsv1.2": ssl.PROTOCOL_TLSv1_2
+        }
+        return switcher.get(tlsString,ssl.PROTOCOL_TLSv1_2)

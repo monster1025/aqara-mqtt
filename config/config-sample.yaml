@@ -4,6 +4,9 @@ mqtt:
   username: username
   password: passw0rd
   prefix: home
+  #secure mqtt. uncomment to enable ssl:
+  #ca: "config/roots.pem"
+  #tls_version: "tlsv1.2"
   #send report as json
   json: False
 
