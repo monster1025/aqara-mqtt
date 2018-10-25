@@ -131,19 +131,22 @@ class Mqtt:
 
     def _mqtt_process_message(self, client, userdata, msg):
         _LOGGER.info("Processing message in " + str(msg.topic) + ": " + str(msg.payload) + ".")
-        parts = msg.topic.split("/")
-        if len(parts) < 4:
+
+        # need to strip prefix to make parts assignment reliable
+        parts = msg.topic.replace(self.prefix+"/","").split("/")
+        partlen = len(parts)
+        if len(parts) < 3:
             # should we return an error message ?
             return
 
-        model = parts[1]
-        query_sid = parts[2]  # sid or name part
-        param = parts[3]  # param part
+        model = parts[0]
+        query_sid = parts[1]  # sid or name part
+        param = parts[2]  # param part
         method = None
-        if len(parts) > 4:
-            method = parts[4]
-        else:
+        if len(parts) > 3:
             method = parts[3]
+        else:
+            method = parts[2]
 
         name = ""  # we will find it next
         sid = query_sid
@@ -160,6 +163,7 @@ class Mqtt:
                 sid = current_sid
                 name = sidname
                 isFound = True
+                _LOGGER.debug("Found " + sid + " = " + name)
                 break
             else:
                 _LOGGER.debug(sidmodel + "-" + sidname + " is not " + model + "-" + query_sid + ".")
