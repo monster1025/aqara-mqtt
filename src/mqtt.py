@@ -1,5 +1,7 @@
 import paho.mqtt.client as mqtt
 import logging
+import os
+import ssl
 from queue import Queue
 from threading import Thread
 import json
@@ -15,8 +17,10 @@ class Mqtt:
     password = ""
     server = "localhost"
     port = 1883
+    ca = None
+    tlsvers = None
     prefix = "home"
-
+    
     _client = None
     _sids = None
     _queue = None
@@ -41,6 +45,10 @@ class Mqtt:
         self.server = mqttConfig.get("server", "localhost")
         self.port = mqttConfig.get("port", 1883)
         self.prefix = mqttConfig.get("prefix", "home")
+        self.ca = mqttConfig.get("ca",None)
+        self.tlsvers = self._get_tls_version(
+                mqttConfig.get("tls_version","tlsv1.2")
+        )
         self.json = mqttConfig.get("json", False)
         self._queue = Queue()
         self._threads = []
@@ -52,8 +60,16 @@ class Mqtt:
             self._client.username_pw_set(self.username, self.password)
         self._client.on_message = self._mqtt_process_message
         self._client.on_connect = self._mqtt_on_connect
-        self._client.connect(self.server, self.port, 60)
+        if (self.ca != None):
+            self._client.tls_set(
+                    ca_certs=self.ca,
+                    cert_reqs=ssl.CERT_REQUIRED,
+                    tls_version=self.tlsvers
+            )
 
+            self._client.tls_insecure_set(False)
+
+        self._client.connect(self.server, self.port, 60)
         # run message processing loop
         t1 = Thread(target=self._mqtt_loop)
         t1.start()
@@ -115,19 +131,22 @@ class Mqtt:
 
     def _mqtt_process_message(self, client, userdata, msg):
         _LOGGER.info("Processing message in " + str(msg.topic) + ": " + str(msg.payload) + ".")
-        parts = msg.topic.split("/")
-        if len(parts) < 4:
+
+        # need to strip prefix to make parts assignment reliable
+        parts = msg.topic.replace(self.prefix+"/","").split("/")
+        partlen = len(parts)
+        if len(parts) < 3:
             # should we return an error message ?
             return
 
-        model = parts[1]
-        query_sid = parts[2]  # sid or name part
-        param = parts[3]  # param part
+        model = parts[0]
+        query_sid = parts[1]  # sid or name part
+        param = parts[2]  # param part
         method = None
-        if len(parts) > 4:
-            method = parts[4]
-        else:
+        if len(parts) > 3:
             method = parts[3]
+        else:
+            method = parts[2]
 
         name = ""  # we will find it next
         sid = query_sid
@@ -144,6 +163,7 @@ class Mqtt:
                 sid = current_sid
                 name = sidname
                 isFound = True
+                _LOGGER.debug("Found " + sid + " = " + name)
                 break
             else:
                 _LOGGER.debug(sidmodel + "-" + sidname + " is not " + model + "-" + query_sid + ".")
@@ -202,3 +222,11 @@ class Mqtt:
             bright = 255
         value = int('%02x%02x%02x%02x' % (bright, r, g, b), 16)
         return value
+
+    def _get_tls_version(self,tlsString):
+        switcher = {
+            "tlsv1": ssl.PROTOCOL_TLSv1,
+            "tlsv1.1": ssl.PROTOCOL_TLSv1_1,
+            "tlsv1.2": ssl.PROTOCOL_TLSv1_2
+        }
+        return switcher.get(tlsString,ssl.PROTOCOL_TLSv1_2)
