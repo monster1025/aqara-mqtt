@@ -95,7 +95,10 @@ class Mqtt:
         items = {}
         for key, value in data.items():
             # fix for latest motion value
+            if (model in self.motion_sensors and key == "status"):
+                items["no_motion"] = 0
             if (model in self.motion_sensors and key == "no_motion"):
+                items[key] = value
                 key = "status"
                 value = "no_motion"
             if (model in self.magnet_sensors and key == "no_close"):
